@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>iOS対応メトロノームテスト</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 3em;
+      font-family: sans-serif;
+    }
+    button {
+      font-size: 1.5em;
+      padding: 1em 2em;
+      background: #0a84ff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>iOS対応メトロノーム テスト</h1>
+  <p>このボタンをタップして、音が鳴るかテストします。</p>
+  <button id="start">Start</button>
+
+  <script>
+    // グローバルに AudioContext を確保
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playClickSound() {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.value = 1000; // 周波数（Hz）
+
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    document.getElementById('start').addEventListener('click', () => {
+      // iOS: resume をクリックイベント直下で呼ぶ
+      audioCtx.resume().then(() => {
+        playClickSound();
+        console.log('AudioContext resumed and sound played.');
+      }).catch(err => {
+        console.error('AudioContext resume failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>
